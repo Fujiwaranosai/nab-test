@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  pg:
+    image: postgres
+    environment:
+      - POSTGRES_DB=nab_test
+      - POSTGRES_USER=nab_user
+      - POSTGRES_PASSWORD=nab_pass
+    networks:
+      - nab
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - pg
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=12345678
+    networks:
+      - nab
+    ports:
+      - 13590:80
+    volumes:
+      - "./servers.json:/pgadmin4/servers.json"
+  db:
+    build:
+      context: ./db
+    container_name: db
+    depends_on:
+      - pg
+    env_file:
+      - db/.env
+    environment:
+      - DATABASE_HOST=pg
+    networks:
+      - nab
+    command: sh -c "node clear && node seed"
+  auth:
+    build:
+      context: ./auth
+    container_name: auth
+    env_file:
+      - auth/.env
+    environment:
+      - HOST=0.0.0.0
+    expose:
+      - "4000"
+    networks:
+      - nab
+  log:
+    build:
+      context: ./log
+    container_name: log
+    depends_on:
+      - pg
+    env_file:
+      - log/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+    expose:
+      - "7000"
+    networks:
+      - nab
+  order:
+    build:
+      context: ./order
+    container_name: order
+    depends_on:
+      - pg
+      - log
+    env_file:
+      - order/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+      - LOG_SERVICE_HOST=log
+    expose:
+      - "6000"
+    networks:
+      - nab
+  product:
+    build:
+      context: ./product
+    container_name: product
+    depends_on:
+      - pg
+      - log
+    env_file:
+      - product/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+      - LOG_SERVICE_HOST=log
+    expose:
+      - "5000"
+    networks:
+      - nab
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    depends_on:
+      - log
+      - order
+      - product
+    env_file:
+      - backend/.env
+    environment:
+      - AUTH_SERVICE_HOST=auth
+      - PRODUCT_SERVICE_HOST=product
+      - ORDER_SERVICE_HOST=order
+      - LOG_SERVICE_HOST=log
+    networks:
+      - nab
+    ports:
+      - 80:3000
+networks:
+  nab:
+    name: nab-network
+    ipam:
+      config:
+        - subnet: 10.10.0.0/24

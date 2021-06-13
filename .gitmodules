@@ -1,0 +1,18 @@
+[submodule "auth"]
+	path = auth
+	url = git@github.com:Fujiwaranosai/auth.git
+[submodule "backend"]
+	path = backend
+	url = git@github.com:Fujiwaranosai/backend.git
+[submodule "db"]
+	path = db
+	url = git@github.com:Fujiwaranosai/db.git
+[submodule "log"]
+	path = log
+	url = git@github.com:Fujiwaranosai/log.git
+[submodule "order"]
+	path = order
+	url = git@github.com:Fujiwaranosai/order.git
+[submodule "product"]
+	path = product
+	url = git@github.com:Fujiwaranosai/product.git
