@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  pg:
+    image: postgres
+    environment:
+      - POSTGRES_DB=nab_test
+      - POSTGRES_USER=nab_user
+      - POSTGRES_PASSWORD=nab_pass
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=12345678
+  db:
+    build:
+      context: ./db
+    container_name: db
+    env_file:
+      - db/.env
+    environment:
+      - DATABASE_HOST=pg
+  auth:
+    build:
+      context: ./auth
+    container_name: auth
+    env_file:
+      - auth/.env
+    environment:
+      - HOST=0.0.0.0
+    expose:
+      - "4000"
+  log:
+    build:
+      context: ./log
+    container_name: log
+    env_file:
+      - log/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+    expose:
+      - "7000"
+  order:
+    build:
+      context: ./order
+    container_name: order
+    env_file:
+      - order/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+      - LOG_SERVICE_HOST=log
+    expose:
+      - "6000"
+  product:
+    build:
+      context: ./product
+    container_name: product
+    env_file:
+      - product/.env
+    environment:
+      - HOST=0.0.0.0
+      - DATABASE_HOST=pg
+      - LOG_SERVICE_HOST=log
+    expose:
+      - "5000"
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    env_file:
+      - backend/.env
+    environment:
+      - AUTH_SERVICE_HOST=auth
+      - PRODUCT_SERVICE_HOST=product
+      - ORDER_SERVICE_HOST=order
+      - LOG_SERVICE_HOST=log

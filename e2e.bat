@@ -1,7 +1,8 @@
-docker-compose -f docker-compose-e2e.yml -p test up -d pg
-docker-compose -f docker-compose-e2e.yml -p test up -d log
-docker-compose -f docker-compose-e2e.yml -p test up -d auth
-docker-compose -f docker-compose-e2e.yml -p test up -d order
-docker-compose -f docker-compose-e2e.yml -p test up -d product
-docker-compose -f docker-compose-e2e.yml -p test up db
-docker-compose -f docker-compose-e2e.yml -p test up -d backend
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d pg-e2e
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d pgadmin-e2e
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d log
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d auth
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d order
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d product
+docker-compose -f docker-compose-e2e.yml -p test-e2e up db
+docker-compose -f docker-compose-e2e.yml -p test-e2e up -d backend

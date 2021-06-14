@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "nab_test_e2e",
+      "Group": "Nab Test",
+      "Port": 5432,
+      "Username": "nab_user",
+      "Host": "pg-e2e",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "postgres"
+    }
+  }
+}

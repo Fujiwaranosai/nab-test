@@ -1,128 +1,112 @@
 version: '3.8'
 
 services:
-  pg:
-    image: postgres
+  pg-e2e:
+    extends:
+      file: docker-compose-base.yml
+      service: pg
+    container_name: pg-e2e
     environment:
-      - POSTGRES_DB=nab_test
-      - POSTGRES_USER=nab_user
-      - POSTGRES_PASSWORD=nab_pass
+      - POSTGRES_DB=nab_test_e2e
     networks:
-      - nab
-  pgadmin:
-    image: dpage/pgadmin4
+      - nab-e2e
+  pgadmin-e2e:
+    extends:
+      file: docker-compose-base.yml
+      service: pgadmin
+    container_name: pgadmin-e2e
     depends_on:
-      - pg
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=12345678
+      - pg-e2e
     networks:
-      - nab
+      - nab-e2e
     ports:
-      - 13590:80
+      - 13591:80
     volumes:
-      - "./servers.json:/pgadmin4/servers.json"
+      - "./servers-e2e.json:/pgadmin4/servers.json"
   db:
-    build:
-      context: ./db
-    container_name: db
+    extends:
+      file: docker-compose-base.yml
+      service: db
+    container_name: db-e2e
     depends_on:
-      - pg
-    env_file:
-      - db/.env
+      - pg-e2e
     environment:
-      - DATABASE_HOST=pg
+      - DATABASE_HOST=pg-e2e
+      - DATABASE_NAME=nab_test_e2e
     networks:
-      - nab
+      - nab-e2e
     command: sh -c "node clear && node seed"
   auth:
-    build:
-      context: ./auth
-    container_name: auth
-    env_file:
-      - auth/.env
-    environment:
-      - HOST=0.0.0.0
-    expose:
-      - "4000"
+    extends:
+      file: docker-compose-base.yml
+      service: auth
+    container_name: auth-e2e
     networks:
-      - nab
+      - nab-e2e
   log:
-    build:
-      context: ./log
-    container_name: log
+    extends:
+      file: docker-compose-base.yml
+      service: log
+    container_name: log-e2e
     depends_on:
-      - pg
-    env_file:
-      - log/.env
+      - pg-e2e
     environment:
-      - HOST=0.0.0.0
-      - DATABASE_HOST=pg
-    expose:
-      - "7000"
+      - DATABASE_HOST=pg-e2e
+      - DATABASE_NAME=nab_test_e2e
     networks:
-      - nab
+      - nab-e2e
   order:
-    build:
-      context: ./order
-    container_name: order
+    extends:
+      file: docker-compose-base.yml
+      service: order
+    container_name: order-e2e
     depends_on:
-      - pg
+      - pg-e2e
       - log
-    env_file:
-      - order/.env
     environment:
-      - HOST=0.0.0.0
-      - DATABASE_HOST=pg
+      - DATABASE_HOST=pg-e2e
+      - DATABASE_NAME=nab_test_e2e
       - LOG_SERVICE_HOST=log
-    expose:
-      - "6000"
     networks:
-      - nab
+      - nab-e2e
   product:
-    build:
-      context: ./product
-    container_name: product
+    extends:
+      file: docker-compose-base.yml
+      service: product
+    container_name: product-e2e
     depends_on:
-      - pg
+      - pg-e2e
       - log
-    env_file:
-      - product/.env
     environment:
-      - HOST=0.0.0.0
-      - DATABASE_HOST=pg
+      - DATABASE_HOST=pg-e2e
+      - DATABASE_NAME=nab_test_e2e
       - LOG_SERVICE_HOST=log
-    expose:
-      - "5000"
     networks:
-      - nab
+      - nab-e2e
   backend:
-    build:
-      context: ./backend
-    container_name: backend
+    extends:
+      file: docker-compose-base.yml
+      service: backend
+    container_name: backend-e2e
     depends_on:
       - log
       - auth
       - order
       - product
-      - pg
-    env_file:
-      - backend/.env
+      - pg-e2e
     environment:
       - AUTH_SERVICE_HOST=auth
       - PRODUCT_SERVICE_HOST=product
       - ORDER_SERVICE_HOST=order
       - LOG_SERVICE_HOST=log
     networks:
-      - nab
-    ports:
-      - 80:3000
+      - nab-e2e
     working_dir: /app
     command: sh -c "npm run test:e2e -- --reporter mochawesome"
     volumes:
       - ./e2e-report:/app/mochawesome-report
 networks:
-  nab:
+  nab-e2e:
     name: nab-network
     ipam:
       config:
