@@ -8,75 +8,59 @@ services:
     container_name: pg
     networks:
       - nab
-  pgadmin:
-    extends:
-      file: docker-compose-base.yml
-      service: pgadmin
-    container_name: pgadmin
-    depends_on:
-      - pg
-    networks:
-      - nab
-    ports:
-      - 13590:80
-    volumes:
-      - "./servers.json:/pgadmin4/servers.json"
-  db:
-    extends:
-      file: docker-compose-base.yml
-      service: db
-    depends_on:
-      - pg
-    networks:
-      - nab
-    command: sh -c "node seed"
-  auth:
+  auth-scale:
     extends:
       file: docker-compose-base.yml
       service: auth
-    container_name: auth
     networks:
       - nab
-  log:
+  log-scale:
     extends:
       file: docker-compose-base.yml
       service: log
-    container_name: log
     depends_on:
       - pg
     networks:
       - nab
-  order:
+  order-scale:
     extends:
       file: docker-compose-base.yml
       service: order
-    container_name: order
     depends_on:
       - pg
-      - log
-      - auth
+      - log-scale
+      - auth-scale
     networks:
       - nab
-  product:
+  product-scale:
     extends:
       file: docker-compose-base.yml
       service: product
-    container_name: product
     depends_on:
       - pg
-      - log
+      - log-scale
     networks:
       - nab
-  backend:
+  backend-scale:
     extends:
       file: docker-compose-base.yml
       service: backend
-    container_name: backend
     depends_on:
-      - order
-      - product
+      - order-scale
+      - product-scale
+    expose:
+      - "3000"
+    networks:
+      - nab
+  nginx:
+    image: nginx
+    container_name: nginx
+    depends_on:
+      - backend-scale
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - 3000:3000
+      - 3001:3000
     networks:
       - nab
 networks:

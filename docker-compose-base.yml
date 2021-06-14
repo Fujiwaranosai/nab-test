@@ -23,7 +23,6 @@ services:
   auth:
     build:
       context: ./auth
-    container_name: auth
     env_file:
       - auth/.env
     environment:
@@ -33,7 +32,6 @@ services:
   log:
     build:
       context: ./log
-    container_name: log
     env_file:
       - log/.env
     environment:
@@ -44,7 +42,6 @@ services:
   order:
     build:
       context: ./order
-    container_name: order
     env_file:
       - order/.env
     environment:
@@ -56,7 +53,6 @@ services:
   product:
     build:
       context: ./product
-    container_name: product
     env_file:
       - product/.env
     environment:
@@ -68,7 +64,6 @@ services:
   backend:
     build:
       context: ./backend
-    container_name: backend
     env_file:
       - backend/.env
     environment:

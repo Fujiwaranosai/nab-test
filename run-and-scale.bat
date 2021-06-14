@@ -1,1 +1,1 @@
-docker-compose -f docker-compose.yml -p test up -d backend --scale auth=2 log=2 order=2 product=2 backend=2
+docker-compose -f docker-compose-scale.yml -p test up -d --scale auth-scale=2 --scale log-scale=2 --scale order-scale=2 --scale backend-scale=2
